@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hangman Game</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding: 30px;
+      background: #f4f4f4;
+    }
+    #gameArea {
+      display: none;
+    }
+    .word {
+      font-size: 32px;
+      letter-spacing: 10px;
+      margin: 20px;
+    }
+    input[type="text"] {
+      font-size: 20px;
+      padding: 5px;
+      width: 50px;
+      text-align: center;
+    }
+    button {
+      font-size: 16px;
+      padding: 8px 16px;
+      margin-top: 10px;
+    }
+    pre {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hangman Game</h1>
+  <div id="startArea">
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <div id="gameArea">
+    <h2 id="lives">6 Lives Left</h2>
+    <div class="word" id="displayWord">_ _ _ _</div>
+    <input type="text" id="letterInput" maxlength="1" />
+    <button onclick="guessLetter()">Guess</button>
+    <p id="message"></p>
+    <pre id="hangmanArt"></pre>
+  </div>
+
+  <script>
+    const wordList = ["awkward","buzzing","cycle","duplex","espionage","fuchsia","galaxy","hyphen","ivory","jigsaw","kayak","luxury","mnemonic","oxygen","pixel","quiz","rhythm","scratch","strength","transplant","unknown","vodka","waltz","xylophone","zombie"];
+    const stages = [
+`  +---+\n  |   |\n  O   |\n /|\\  |\n / \\  |\n      |\n=========`,
+`  +---+\n  |   |\n  O   |\n /|\\  |\n /    |\n      |\n=========`,
+`  +---+\n  |   |\n  O   |\n /|\\  |\n      |\n      |\n=========`,
+`  +---+\n  |   |\n  O   |\n /|   |\n      |\n      |\n=========`,
+`  +---+\n  |   |\n  O   |\n  |   |\n      |\n      |\n=========`,
+`  +---+\n  |   |\n  O   |\n      |\n      |\n      |\n=========`,
+`  +---+\n  |   |\n      |\n      |\n      |\n      |\n=========`
+    ];
+
+    let chosenWord = "";
+    let displayWord = [];
+    let correctLetters = [];
+    let lives = 6;
+
+    function startGame() {
+      chosenWord = wordList[Math.floor(Math.random() * wordList.length)].toLowerCase();
+      displayWord = Array(chosenWord.length).fill("_");
+      correctLetters = [];
+      lives = 6;
+
+      document.getElementById("displayWord").textContent = displayWord.join(" ");
+      document.getElementById("lives").textContent = `${lives} Lives Left`;
+      document.getElementById("hangmanArt").textContent = stages[6];
+      document.getElementById("message").textContent = "";
+      document.getElementById("startArea").style.display = "none";
+      document.getElementById("gameArea").style.display = "block";
+    }
+
+    function guessLetter() {
+      const input = document.getElementById("letterInput");
+      const guess = input.value.toLowerCase();
+      input.value = "";
+
+      if (!guess || guess.length !== 1 || !/^[a-z]$/.test(guess)) {
+        document.getElementById("message").textContent = "Enter a valid single letter.";
+        return;
+      }
+
+      if (correctLetters.includes(guess)) {
+        document.getElementById("message").textContent = `You've already guessed '${guess}'.`;
+        return;
+      }
+
+      let correctGuess = false;
+      for (let i = 0; i < chosenWord.length; i++) {
+        if (chosenWord[i] === guess) {
+          displayWord[i] = guess;
+          correctGuess = true;
+        }
+      }
+
+      if (correctGuess) {
+        correctLetters.push(guess);
+        document.getElementById("message").textContent = `Good guess: ${guess}`;
+      } else {
+        lives--;
+        document.getElementById("message").textContent = `Wrong guess: ${guess}`;
+      }
+
+      document.getElementById("displayWord").textContent = displayWord.join(" ");
+      document.getElementById("lives").textContent = `${lives} Lives Left`;
+      document.getElementById("hangmanArt").textContent = stages[6 - lives];
+
+      if (lives === 0) {
+        document.getElementById("message").textContent = `You lose! The word was '${chosenWord}'`;
+        document.getElementById("gameArea").style.display = "none";
+        document.getElementById("startArea").style.display = "block";
+      } else if (!displayWord.includes("_")) {
+        document.getElementById("message").textContent = "Congratulations! You win!";
+        document.getElementById("gameArea").style.display = "none";
+        document.getElementById("startArea").style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
